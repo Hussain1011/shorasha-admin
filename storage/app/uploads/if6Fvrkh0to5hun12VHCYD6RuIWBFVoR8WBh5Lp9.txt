@@ -1,0 +1,10 @@
+23:33:16	 From ahmedshawky : Consultant => create + all data
+23:37:16	 From Mohamed Fathy : Replying to "Consultant => create..."
+
+soft delete + trash
+23:37:25	 From ahmedshawky : List for trashed user , consultant
+23:49:18	 From ahmedshawky : Remove  delete appointment  , 
+Add popup alert for delete. 
+Add redirect from appointment to user or dr profile
+23:50:33	 From ahmedshawky : Add wallet to profile
+23:52:15	 From ahmedshawky : Add numbers for sessions status

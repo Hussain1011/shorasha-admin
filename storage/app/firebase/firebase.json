@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "naraakom-basirah-app-71123",
+  "private_key_id": "09f6df95fdb9ecd0c20e61a54919fef26e188a88",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQDIMfloL4WYaWei\nRwiNspTJtAhFECAD3nQIj9eajX0OvYbb366lyGULgkw60fOgUdaNmTr0Sk0LMvtT\nkhnv5SPfv/UxpBM9ISTkul6nG2uWtA2OjBKwVAA5lFJA5cyCk09D0tu1K8xSvcLY\n+ZjpoNr01VZJn7DeAjcC22MMRuhxK+Wao7tDjil7pj1fw5aZojIuACj5VQ84zGn8\nJ+ZHGc2ig3rLxZ/xAbrjpSfu/iIEerSLy++zuRtCB0JxznVCWWbO7Y/at4WJcvBh\nxnE+CmcN1yF40ztbAXh9yh1wuE8VTzIR9wX2xbnNRW78B5A+GAIyfZnFEIPeXu29\nIYAmU/iBAgMBAAECgf8F8bLfO+uDLs7H+xoNiLtS/tAhkinCtrIZxdZEDjudr9tS\nwU/44kUFaVFjQwxuImF03AEEHltS4vIoxIGV+trONiZrhTIfU94hhNrsJG7zdsOh\nC7Vj30tldndJ/yc5dkGx9y3Cq7yIaSk83V0iSZOkd3pKskoAZejRkv43y0rPWoSq\nVY6KlLmOaZNejDAoBCPARLNQTzeUOSi/TUhvfZI/AEAs09/vXAJykV9R1V5hhPW/\nJKTdertfZah1vFnmeLDPpKbxiu1+EsvBc7zKinZygs/wTSuQoSlemNTffpDthoDI\nSd/tFDm/GglOvYCdUNsm8LPlnvUnmiua3lLiz+ECgYEA7YXSzBbMAh3G6npGSZEn\nKyHZdOwfVwh5tk2cwLDtMVFcXYVNccd87fkZKZUD8rE2prQepaCj3T80eBfTUFJd\nEUkAw0LGZiiZIPCU2SUSMlxj3Ss0vB3R+XMZ8ZlOqqVj/VhfiVtaIW3lgkT18Fem\n2BD1SkD8JIt906yVEBhWIJECgYEA18TJc6rTQDaRtULEIxU/JIm8e/ZsnN+JbYG/\nQN/CIhSVR9vJsj9NVVKW3w6ve0ycm6LjsNYxck3dLv3vEFGTCAw5A2ivftIUDohQ\nf0PrC5gTUgbVKu4hQCA/8+roLvmQ6pwfulbQiTNGXGzNDG9FDL0kJ0qrnM6OybcJ\nH+ryUPECgYBNEO6kaYEn7qFr0uCbXg1nYUQ9O5+vjYBwNh52JvHO3qcpcOb/08ol\nLH2NkFwHkpg43phTBRwl3SwZCyH1HcQ0p4snz7Kv0txcY7LoAa81x+RfDnW9068d\nUMtKKIPtulwHB3V4C7vivNWKvvVNViM8V8Q+o3csJFZfJ8/1uO+5AQKBgF0LUifb\n4U8OeRTmHrhWQC1ca/g00q9vQc8EJVovY4LYx2r+X2LLI2kIvWCg75FG/z2qJ2+p\nXhdBdoD+Jeouky3kP2215f/VTarao4PN4PzV7nbv1Vq254XEom9nvAoNuq1A9/md\n2D1h7BSNInsbPHZ61a1P6OMsu6xGjtvBsA6xAoGAWMXgQjQv9T9NVzr9h2/U48QK\nPkVO/Ijg1eOVyHJfAaMB3MD6vpaT6bMyetsWtTm5iOr6geTAy/KP0R6MTMsyvFGl\n3GxCeDyc0YRWsm+29f0JMC2LmZaAr/5ozHDx5CVAJOlP5sG0a99fZKpecq6Rwu3f\nA9T52Pyo4Jv2L1YRX98=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-5u37o@naraakom-basirah-app-71123.iam.gserviceaccount.com",
+  "client_id": "111582917028082206684",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5u37o%40naraakom-basirah-app-71123.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
