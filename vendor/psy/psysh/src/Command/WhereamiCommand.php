@@ -23,9 +23,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class WhereamiCommand extends Command
 {
-    private array $backtrace;
+    private $backtrace;
 
-    public function __construct()
+    /**
+     * @param string|null $colorMode (deprecated and ignored)
+     */
+    public function __construct($colorMode = null)
     {
         $this->backtrace = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS);
 
@@ -109,7 +112,7 @@ HELP
      *
      * @return int 0 if everything went fine, or an exit code
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $info = $this->fileInfo();
         $num = $input->getOption('num');

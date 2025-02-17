@@ -28,10 +28,9 @@ class SearchPrompt extends Prompt
         public Closure $options,
         public string $placeholder = '',
         public int $scroll = 5,
-        public mixed $validate = null,
+        public ?Closure $validate = null,
         public string $hint = '',
         public bool|string $required = true,
-        public ?Closure $transform = null,
     ) {
         if ($this->required === false) {
             throw new InvalidArgumentException('Argument [required] must be true or a string.');

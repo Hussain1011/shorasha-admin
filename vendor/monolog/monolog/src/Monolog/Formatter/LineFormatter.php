@@ -34,12 +34,13 @@ class LineFormatter extends NormalizerFormatter
     protected ?int $maxLevelNameLength = null;
     protected string $indentStacktraces = '';
     protected Closure|null $stacktracesParser = null;
-    protected string $basePath = '';
 
     /**
      * @param string|null $format                The format of the message
      * @param string|null $dateFormat            The format of the timestamp: one supported by DateTime::format
      * @param bool        $allowInlineLineBreaks Whether to allow inline line breaks in log entries
+     *
+     * @throws \RuntimeException If the function json_encode does not exist
      */
     public function __construct(?string $format = null, ?string $dateFormat = null, bool $allowInlineLineBreaks = false, bool $ignoreEmptyContextAndExtra = false, bool $includeStacktraces = false)
     {
@@ -48,21 +49,6 @@ class LineFormatter extends NormalizerFormatter
         $this->ignoreEmptyContextAndExtra = $ignoreEmptyContextAndExtra;
         $this->includeStacktraces($includeStacktraces);
         parent::__construct($dateFormat);
-    }
-
-    /**
-     * Setting a base path will hide the base path from exception and stack trace file names to shorten them
-     * @return $this
-     */
-    public function setBasePath(string $path = ''): self
-    {
-        if ($path !== '') {
-            $path = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        }
-
-        $this->basePath = $path;
-
-        return $this;
     }
 
     /**
@@ -82,7 +68,7 @@ class LineFormatter extends NormalizerFormatter
     /**
      * Indent stack traces to separate them a bit from the main log record messages
      *
-     * @param  string $indent The string used to indent, for example "    "
+     * @param string $indent The string used to indent, for example "    "
      * @return $this
      */
     public function indentStacktraces(string $indent): self
@@ -115,7 +101,7 @@ class LineFormatter extends NormalizerFormatter
     /**
      * Allows cutting the level name to get fixed-length levels like INF for INFO, ERR for ERROR if you set this to 3 for example
      *
-     * @param  int|null $maxLevelNameLength Maximum characters for the level name. Set null for infinite length (default)
+     * @param int|null $maxLevelNameLength Maximum characters for the level name. Set null for infinite length (default)
      * @return $this
      */
     public function setMaxLevelNameLength(?int $maxLevelNameLength = null): self
@@ -175,7 +161,7 @@ class LineFormatter extends NormalizerFormatter
             if (null === $output) {
                 $pcreErrorCode = preg_last_error();
 
-                throw new \RuntimeException('Failed to run preg_replace: ' . $pcreErrorCode . ' / ' . preg_last_error_msg());
+                throw new \RuntimeException('Failed to run preg_replace: ' . $pcreErrorCode . ' / ' . Utils::pcreLastErrorMessage($pcreErrorCode));
             }
         }
 
@@ -224,11 +210,11 @@ class LineFormatter extends NormalizerFormatter
      */
     protected function convertToString($data): string
     {
-        if (null === $data || \is_bool($data)) {
+        if (null === $data || is_bool($data)) {
             return var_export($data, true);
         }
 
-        if (\is_scalar($data)) {
+        if (is_scalar($data)) {
             return (string) $data;
         }
 
@@ -242,8 +228,7 @@ class LineFormatter extends NormalizerFormatter
                 $str = preg_replace('/(?<!\\\\)\\\\[rn]/', "\n", $str);
                 if (null === $str) {
                     $pcreErrorCode = preg_last_error();
-
-                    throw new \RuntimeException('Failed to run preg_replace: ' . $pcreErrorCode . ' / ' . preg_last_error_msg());
+                    throw new \RuntimeException('Failed to run preg_replace: ' . $pcreErrorCode . ' / ' . Utils::pcreLastErrorMessage($pcreErrorCode));
                 }
             }
 
@@ -266,20 +251,14 @@ class LineFormatter extends NormalizerFormatter
             }
 
             if (isset($e->detail)) {
-                if (\is_string($e->detail)) {
+                if (is_string($e->detail)) {
                     $str .= ' detail: ' . $e->detail;
-                } elseif (\is_object($e->detail) || \is_array($e->detail)) {
+                } elseif (is_object($e->detail) || is_array($e->detail)) {
                     $str .= ' detail: ' . $this->toJson($e->detail, true);
                 }
             }
         }
-
-        $file = $e->getFile();
-        if ($this->basePath !== '') {
-            $file = preg_replace('{^'.preg_quote($this->basePath).'}', '', $file);
-        }
-
-        $str .= '): ' . $e->getMessage() . ' at ' . $file . ':' . $e->getLine() . ')';
+        $str .= '): ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine() . ')';
 
         if ($this->includeStacktraces) {
             $str .= $this->stacktracesParser($e);
@@ -291,10 +270,6 @@ class LineFormatter extends NormalizerFormatter
     private function stacktracesParser(\Throwable $e): string
     {
         $trace = $e->getTraceAsString();
-
-        if ($this->basePath !== '') {
-            $trace = preg_replace('{^(#\d+ )' . preg_quote($this->basePath) . '}m', '$1', $trace) ?? $trace;
-        }
 
         if ($this->stacktracesParser !== null) {
             $trace = $this->stacktracesParserCustom($trace);
@@ -309,6 +284,6 @@ class LineFormatter extends NormalizerFormatter
 
     private function stacktracesParserCustom(string $trace): string
     {
-        return implode("\n", array_filter(array_map($this->stacktracesParser, explode("\n", $trace)), fn ($line) => is_string($line) && trim($line) !== ''));
+        return implode("\n", array_filter(array_map($this->stacktracesParser, explode("\n", $trace))));
     }
 }

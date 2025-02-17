@@ -7,16 +7,14 @@ use Spatie\Backtrace\Arguments\ArgumentReducers;
 use Spatie\Backtrace\Arguments\Reducers\ArgumentReducer;
 use Spatie\Backtrace\Backtrace;
 use Spatie\Backtrace\Frame as SpatieFrame;
-use Spatie\ErrorSolutions\Contracts\Solution;
 use Spatie\FlareClient\Concerns\HasContext;
 use Spatie\FlareClient\Concerns\UsesTime;
 use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Contracts\ProvidesFlareContext;
 use Spatie\FlareClient\Glows\Glow;
 use Spatie\FlareClient\Solutions\ReportSolution;
-use Spatie\Ignition\Contracts\Solution as IgnitionSolution;
-use Spatie\LaravelFlare\Exceptions\ViewException;
-use Spatie\LaravelIgnition\Exceptions\ViewException as IgnitionViewException;
+use Spatie\Ignition\Contracts\Solution;
+use Spatie\LaravelIgnition\Exceptions\ViewException;
 use Throwable;
 
 class Report
@@ -67,14 +65,7 @@ class Report
 
     public static ?string $fakeTrackingUuid = null;
 
-    protected ?bool $handled = null;
-
-    protected ?string $overriddenGrouping = null;
-
-    /**
-     * @param array<class-string<ArgumentReducer>|ArgumentReducer>|ArgumentReducers|null $argumentReducers
-     * @param array<class-string, string> $overriddenGroupings
-     */
+    /** @param array<class-string<ArgumentReducer>|ArgumentReducer>|ArgumentReducers|null $argumentReducers */
     public static function createForThrowable(
         Throwable $throwable,
         ContextProvider $context,
@@ -82,36 +73,27 @@ class Report
         ?string $version = null,
         null|array|ArgumentReducers $argumentReducers = null,
         bool $withStackTraceArguments = true,
-        array $overriddenGroupings = [],
     ): self {
         $stacktrace = Backtrace::createForThrowable($throwable)
             ->withArguments($withStackTraceArguments)
             ->reduceArguments($argumentReducers)
             ->applicationPath($applicationPath ?? '');
 
-        $exceptionClass = self::getClassForThrowable($throwable);
-
-        $report = (new self())
+        return (new self())
             ->setApplicationPath($applicationPath)
             ->throwable($throwable)
             ->useContext($context)
-            ->exceptionClass($exceptionClass)
+            ->exceptionClass(self::getClassForThrowable($throwable))
             ->message($throwable->getMessage())
             ->stackTrace($stacktrace)
             ->exceptionContext($throwable)
             ->setApplicationVersion($version);
-
-        if (array_key_exists($exceptionClass, $overriddenGroupings)) {
-            $report->overriddenGrouping($overriddenGroupings[$exceptionClass]);
-        }
-
-        return $report;
     }
 
     protected static function getClassForThrowable(Throwable $throwable): string
     {
         /** @phpstan-ignore-next-line */
-        if ($throwable::class === IgnitionViewException::class || $throwable::class === ViewException::class) {
+        if ($throwable::class === ViewException::class) {
             /** @phpstan-ignore-next-line */
             if ($previous = $throwable->getPrevious()) {
                 return get_class($previous);
@@ -275,7 +257,7 @@ class Report
         return $this;
     }
 
-    public function addSolution(Solution|IgnitionSolution $solution): self
+    public function addSolution(Solution $solution): self
     {
         $this->solutions[] = ReportSolution::fromSolution($solution)->toArray();
 
@@ -316,20 +298,6 @@ class Report
         $context = array_merge_recursive_distinct($context, $this->exceptionContext);
 
         return array_merge_recursive_distinct($context, $this->userProvidedContext);
-    }
-
-    public function handled(?bool $handled = true): self
-    {
-        $this->handled = $handled;
-
-        return $this;
-    }
-
-    public function overriddenGrouping(?string $overriddenGrouping): self
-    {
-        $this->overriddenGrouping = $overriddenGrouping;
-
-        return $this;
     }
 
     protected function exceptionContext(Throwable $throwable): self
@@ -408,8 +376,6 @@ class Report
             'application_path' => $this->applicationPath,
             'application_version' => $this->applicationVersion,
             'tracking_uuid' => $this->trackingUuid,
-            'handled' => $this->handled,
-            'overridden_grouping' => $this->overriddenGrouping,
         ];
     }
 

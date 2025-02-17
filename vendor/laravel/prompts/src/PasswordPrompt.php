@@ -15,9 +15,8 @@ class PasswordPrompt extends Prompt
         public string $label,
         public string $placeholder = '',
         public bool|string $required = false,
-        public mixed $validate = null,
-        public string $hint = '',
-        public ?Closure $transform = null,
+        public ?Closure $validate = null,
+        public string $hint = ''
     ) {
         $this->trackTypedValue();
     }

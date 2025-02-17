@@ -28,21 +28,24 @@ class TimeitCommand extends Command
     const AVG_RESULT_MSG = '<info>Command took %.6f seconds on average (%.6f median; %.6f total) to complete.</info>';
 
     // All times stored as nanoseconds!
-    private static ?int $start = null;
-    private static array $times = [];
+    private static $useHrtime;
+    private static $start = null;
+    private static $times = [];
 
-    private CodeArgumentParser $parser;
-    private NodeTraverser $traverser;
-    private Printer $printer;
+    private $parser;
+    private $traverser;
+    private $printer;
 
     /**
      * {@inheritdoc}
      */
     public function __construct($name = null)
     {
+        // @todo Remove microtime use after we drop support for PHP < 7.3
+        self::$useHrtime = \function_exists('hrtime');
+
         $this->parser = new CodeArgumentParser();
 
-        // @todo Pass visitor directly to once we drop support for PHP-Parser 4.x
         $this->traverser = new NodeTraverser();
         $this->traverser->addVisitor(new TimeitVisitor());
 
@@ -79,12 +82,11 @@ HELP
      *
      * @return int 0 if everything went fine, or an exit code
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $code = $input->getArgument('code');
         $num = (int) ($input->getOption('num') ?: 1);
-
-        $shell = $this->getShell();
+        $shell = $this->getApplication();
 
         $instrumentedCode = $this->instrumentCode($code);
 
@@ -122,7 +124,7 @@ HELP
      */
     public static function markStart()
     {
-        self::$start = \hrtime(true);
+        self::$start = self::$useHrtime ? \hrtime(true) : (\microtime(true) * 1e+6);
     }
 
     /**
@@ -141,7 +143,7 @@ HELP
      */
     public static function markEnd($ret = null)
     {
-        self::$times[] = \hrtime(true) - self::$start;
+        self::$times[] = (self::$useHrtime ? \hrtime(true) : (\microtime(true) * 1e+6)) - self::$start;
         self::$start = null;
 
         return $ret;

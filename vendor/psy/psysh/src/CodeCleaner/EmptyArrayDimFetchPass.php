@@ -25,7 +25,7 @@ class EmptyArrayDimFetchPass extends CodeCleanerPass
 {
     const EXCEPTION_MESSAGE = 'Cannot use [] for reading';
 
-    private array $theseOnesAreFine = [];
+    private $theseOnesAreFine = [];
 
     /**
      * @return Node[]|null Array of nodes
@@ -59,7 +59,7 @@ class EmptyArrayDimFetchPass extends CodeCleanerPass
 
         if ($node instanceof ArrayDimFetch && $node->dim === null) {
             if (!\in_array($node, $this->theseOnesAreFine)) {
-                throw new FatalErrorException(self::EXCEPTION_MESSAGE, $node->getStartLine());
+                throw new FatalErrorException(self::EXCEPTION_MESSAGE, $node->getLine());
             }
         }
     }

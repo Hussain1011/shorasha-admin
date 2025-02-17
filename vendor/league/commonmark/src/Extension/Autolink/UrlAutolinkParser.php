@@ -34,7 +34,7 @@ final class UrlAutolinkParser implements InlineParserInterface
                 (?:
                     (?:xn--[a-z0-9-]++\.)*+xn--[a-z0-9-]++            # a domain name using punycode
                         |
-                    (?:[\pL\pN\pS\pM\-\_]++\.){1,127}[\pL\pN\pM]++    # a multi-level domain name; total length must be 253 bytes or less
+                    (?:[\pL\pN\pS\pM\-\_]++\.)+[\pL\pN\pM]++          # a multi-level domain name
                         |
                     [a-z0-9\-\_]++                                    # a single-level domain name
                 )\.?
@@ -56,7 +56,7 @@ final class UrlAutolinkParser implements InlineParserInterface
      *
      * @psalm-readonly
      */
-    private array $prefixes = ['www.'];
+    private array $prefixes = ['www'];
 
     /**
      * @psalm-var non-empty-string
@@ -65,12 +65,10 @@ final class UrlAutolinkParser implements InlineParserInterface
      */
     private string $finalRegex;
 
-    private string $defaultProtocol;
-
     /**
      * @param array<int, string> $allowedProtocols
      */
-    public function __construct(array $allowedProtocols = ['http', 'https', 'ftp'], string $defaultProtocol = 'http')
+    public function __construct(array $allowedProtocols = ['http', 'https', 'ftp'])
     {
         /**
          * @psalm-suppress PropertyTypeCoercion
@@ -80,8 +78,6 @@ final class UrlAutolinkParser implements InlineParserInterface
         foreach ($allowedProtocols as $protocol) {
             $this->prefixes[] = $protocol . '://';
         }
-
-        $this->defaultProtocol = $defaultProtocol;
     }
 
     public function getMatchDefinition(): InlineParserMatch
@@ -124,9 +120,9 @@ final class UrlAutolinkParser implements InlineParserInterface
 
         $cursor->advanceBy(\mb_strlen($url, 'UTF-8'));
 
-        // Auto-prefix 'http(s)://' onto 'www' URLs
+        // Auto-prefix 'http://' onto 'www' URLs
         if (\substr($url, 0, 4) === 'www.') {
-            $inlineContext->getContainer()->appendChild(new Link($this->defaultProtocol . '://' . $url, $url));
+            $inlineContext->getContainer()->appendChild(new Link('http://' . $url, $url));
 
             return true;
         }

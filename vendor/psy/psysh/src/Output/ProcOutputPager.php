@@ -23,13 +23,10 @@ use Symfony\Component\Console\Output\StreamOutput;
  */
 class ProcOutputPager extends StreamOutput implements OutputPager
 {
-    /** @var ?resource */
-    private $proc = null;
-    /** @var ?resource */
-    private $pipe = null;
-    /** @var resource */
+    private $proc;
+    private $pipe;
     private $stream;
-    private string $cmd;
+    private $cmd;
 
     /**
      * Constructor.
@@ -51,7 +48,7 @@ class ProcOutputPager extends StreamOutput implements OutputPager
      *
      * @throws \RuntimeException When unable to write output (should never happen)
      */
-    public function doWrite($message, $newline): void
+    public function doWrite($message, $newline)
     {
         $pipe = $this->getPipe();
         if (false === @\fwrite($pipe, $message.($newline ? \PHP_EOL : ''))) {

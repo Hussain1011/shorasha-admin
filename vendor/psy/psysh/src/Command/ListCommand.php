@@ -35,8 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ListCommand extends ReflectingCommand implements PresenterAware
 {
-    protected Presenter $presenter;
-    protected array $enumerators;
+    protected $presenter;
+    protected $enumerators;
 
     /**
      * PresenterAware interface.
@@ -114,7 +114,7 @@ HELP
      *
      * @return int 0 if everything went fine, or an exit code
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->validateInput($input);
         $this->initEnumerators();

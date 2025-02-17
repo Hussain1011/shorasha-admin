@@ -20,8 +20,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class EditCommand extends Command implements ContextAware
 {
-    private string $runtimeDir = '';
-    private Context $context;
+    /**
+     * @var string
+     */
+    private $runtimeDir = '';
+
+    /**
+     * @var Context
+     */
+    private $context;
 
     /**
      * Constructor.
@@ -72,7 +79,7 @@ class EditCommand extends Command implements ContextAware
      * @throws \InvalidArgumentException when both exec and no-exec flags are given or if a given variable is not found in the current context
      * @throws \UnexpectedValueException if file_get_contents on the edited file returns false instead of a string
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         if ($input->getOption('exec') &&
             $input->getOption('no-exec')) {
@@ -97,7 +104,7 @@ class EditCommand extends Command implements ContextAware
         $editedContent = $this->editFile($filePath, $shouldRemoveFile);
 
         if ($execute) {
-            $this->getShell()->addInput($editedContent);
+            $this->getApplication()->addInput($editedContent);
         }
 
         return 0;
@@ -108,7 +115,7 @@ class EditCommand extends Command implements ContextAware
      * @param bool        $noExecOption
      * @param string|null $filePath
      */
-    private function shouldExecuteFile(bool $execOption, bool $noExecOption, ?string $filePath = null): bool
+    private function shouldExecuteFile(bool $execOption, bool $noExecOption, string $filePath = null): bool
     {
         if ($execOption) {
             return true;
@@ -129,7 +136,7 @@ class EditCommand extends Command implements ContextAware
      *
      * @throws \InvalidArgumentException If the variable is not found in the current context
      */
-    private function extractFilePath(?string $fileArgument = null)
+    private function extractFilePath(string $fileArgument = null)
     {
         // If the file argument was a variable, get it from the context
         if ($fileArgument !== null &&

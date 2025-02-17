@@ -11,7 +11,6 @@
 
 namespace Psy\ExecutionLoop;
 
-use PhpParser\Parser;
 use Psy\Exception\ParseErrorException;
 use Psy\ParserFactory;
 use Psy\Shell;
@@ -23,8 +22,8 @@ use Psy\Shell;
  */
 class RunkitReloader extends AbstractListener
 {
-    private Parser $parser;
-    private array $timestamps = [];
+    private $parser;
+    private $timestamps = [];
 
     /**
      * Only enabled if Runkit is installed.
@@ -37,10 +36,13 @@ class RunkitReloader extends AbstractListener
 
     /**
      * Construct a Runkit Reloader.
+     *
+     * @todo Pass in Parser Factory instance for dependency injection?
      */
     public function __construct()
     {
-        $this->parser = (new ParserFactory())->createParser();
+        $parserFactory = new ParserFactory();
+        $this->parser = $parserFactory->createParser();
     }
 
     /**

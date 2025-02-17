@@ -40,9 +40,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscriberInterface
 {
     /**
+     * @see \Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer::DISABLE_TYPE_ENFORCEMENT
      * @see DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS
      */
     private const CONTEXT_DENORMALIZE = [
+        'disable_type_enforcement' => true,
         'collect_denormalization_errors' => true,
     ];
 
@@ -106,15 +108,11 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 } catch (PartialDenormalizationException $e) {
                     $trans = $this->translator ? $this->translator->trans(...) : fn ($m, $p) => strtr($m, $p);
                     foreach ($e->getErrors() as $error) {
-                        $parameters = [];
-                        $template = 'This value was of an unexpected type.';
-                        if ($expectedTypes = $error->getExpectedTypes()) {
-                            $template = 'This value should be of type {{ type }}.';
-                            $parameters['{{ type }}'] = implode('|', $expectedTypes);
-                        }
+                        $parameters = ['{{ type }}' => implode('|', $error->getExpectedTypes())];
                         if ($error->canUseMessageForUser()) {
                             $parameters['hint'] = $error->getMessage();
                         }
+                        $template = 'This value should be of type {{ type }}.';
                         $message = $trans($template, $parameters, 'validators');
                         $violations->add(new ConstraintViolation($message, $template, $parameters, null, $error->getPath(), null));
                     }
@@ -163,7 +161,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
             return null;
         }
 
-        return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
+        return $this->serializer->denormalize($data, $type, null, $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
     }
 
     private function mapRequestPayload(Request $request, string $type, MapRequestPayload $attribute): ?object
@@ -177,7 +175,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if ($data = $request->request->all()) {
-            return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
+            return $this->serializer->denormalize($data, $type, null, $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
         }
 
         if ('' === $data = $request->getContent()) {

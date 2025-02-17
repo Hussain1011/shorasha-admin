@@ -17,7 +17,6 @@ use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\LogicException;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\Exception\UnexpectedResponseException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\AbstractStream;
@@ -39,9 +38,10 @@ class SmtpTransport extends AbstractTransport
     private int $pingThreshold = 100;
     private float $lastMessageTime = 0;
     private AbstractStream $stream;
+    private string $mtaResult = '';
     private string $domain = '[127.0.0.1]';
 
-    public function __construct(?AbstractStream $stream = null, ?EventDispatcherInterface $dispatcher = null, ?LoggerInterface $logger = null)
+    public function __construct(AbstractStream $stream = null, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
         parent::__construct($dispatcher, $logger);
 
@@ -131,7 +131,7 @@ class SmtpTransport extends AbstractTransport
         return $this->domain;
     }
 
-    public function send(RawMessage $message, ?Envelope $envelope = null): ?SentMessage
+    public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
     {
         try {
             $message = parent::send($message, $envelope);
@@ -145,6 +145,10 @@ class SmtpTransport extends AbstractTransport
             }
 
             throw $e;
+        }
+
+        if ($this->mtaResult && $messageId = $this->parseMessageId($this->mtaResult)) {
+            $message->setMessageId($messageId);
         }
 
         $this->checkRestartThreshold();
@@ -205,11 +209,11 @@ class SmtpTransport extends AbstractTransport
             $this->ping();
         }
 
-        try {
-            if (!$this->started) {
-                $this->start();
-            }
+        if (!$this->started) {
+            $this->start();
+        }
 
+        try {
             $envelope = $message->getEnvelope();
             $this->doMailFromCommand($envelope->getSender()->getEncodedAddress());
             foreach ($envelope->getRecipients() as $recipient) {
@@ -230,13 +234,9 @@ class SmtpTransport extends AbstractTransport
                 $this->getLogger()->debug(sprintf('Email transport "%s" stopped', __CLASS__));
                 throw $e;
             }
-            $mtaResult = $this->executeCommand("\r\n.\r\n", [250]);
+            $this->mtaResult = $this->executeCommand("\r\n.\r\n", [250]);
             $message->appendDebug($this->stream->getDebug());
             $this->lastMessageTime = microtime(true);
-
-            if ($mtaResult && $messageId = $this->parseMessageId($mtaResult)) {
-                $message->setMessageId($messageId);
-            }
         } catch (TransportExceptionInterface $e) {
             $e->appendDebug($this->stream->getDebug());
             $this->lastMessageTime = 0;
@@ -335,7 +335,7 @@ class SmtpTransport extends AbstractTransport
             $codeStr = $code ? sprintf('code "%s"', $code) : 'empty code';
             $responseStr = $response ? sprintf(', with message "%s"', trim($response)) : '';
 
-            throw new UnexpectedResponseException(sprintf('Expected response code "%s" but got ', implode('/', $codes)).$codeStr.$responseStr.'.', $code ?: 0);
+            throw new TransportException(sprintf('Expected response code "%s" but got ', implode('/', $codes)).$codeStr.$responseStr.'.', $code ?: 0);
         }
     }
 

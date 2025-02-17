@@ -14,10 +14,9 @@ namespace Monolog\Test;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
-use Monolog\JsonSerializableDateTimeImmutable;
+use Monolog\DateTimeImmutable;
 use Monolog\Formatter\FormatterInterface;
 use Psr\Log\LogLevel;
-use ReflectionProperty;
 
 /**
  * Lets you easily generate log records and a dummy formatter for testing purposes
@@ -28,13 +27,22 @@ use ReflectionProperty;
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        if (isset($this->handler)) {
+            unset($this->handler);
+        }
+    }
+
     /**
      * @param array<mixed> $context
      * @param array<mixed> $extra
      *
      * @phpstan-param value-of<Level::VALUES>|value-of<Level::NAMES>|Level|LogLevel::* $level
      */
-    protected function getRecord(int|string|Level $level = Level::Warning, string|\Stringable $message = 'test', array $context = [], string $channel = 'test', \DateTimeImmutable $datetime = new JsonSerializableDateTimeImmutable(true), array $extra = []): LogRecord
+    protected function getRecord(int|string|Level $level = Level::Warning, string|\Stringable $message = 'test', array $context = [], string $channel = 'test', \DateTimeImmutable $datetime = new DateTimeImmutable(true), array $extra = []): LogRecord
     {
         return new LogRecord(
             message: (string) $message,
